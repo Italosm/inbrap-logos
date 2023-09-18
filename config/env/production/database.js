@@ -1,26 +1,21 @@
-const path = require('path');
+const { parse } = require("pg-connection-string");
 
 module.exports = ({ env }) => {
-  const client = env('DATABASE_CLIENT', 'sqlite');
-
-  const connections = {
-    sqlite: {
-      connection: {
-        filename: path.join(
-          __dirname,
-          '..',
-          env('DATABASE_FILENAME', '.tmp/data.db')
-        ),
-      },
-      useNullAsDefault: true,
-    },
-  };
+  const { host, port, database, user, password } = parse(env("DATABASE_URL"));
 
   return {
     connection: {
-      client,
-      ...connections[client],
-      acquireConnectionTimeout: env.int('DATABASE_CONNECTION_TIMEOUT', 60000),
+      client: 'postgres',
+      connection: {
+        host,
+        port,
+        database,
+        user,
+        password,
+        ssl: { rejectUnauthorized: false },
+      },
+      debug: false,
     },
-  };
+  }
 };
+
